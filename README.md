@@ -8,7 +8,7 @@ Data cleaning and preprocessing can be done in a separate step, then save the cl
 
 ```
 Usage:
-    python3 clean_data.py train.csv test.csv 
+    python3 clean_data.py --train train.csv --test test.csv 
 
 Outputs clean_train.csv and clean_test.csv. 
 ```
@@ -62,3 +62,7 @@ Test: Save the ready-to-use predictions to submission.csv in the root folder.
 - sklearn
 - XGBoost
 - LightGBM 
+
+## Improvements
+
+- Add ensemble and bagging of models 

@@ -1,30 +1,34 @@
-import pandas as pd 
+import pandas as pd
+# import xgboost as xgb
 import os
 
 """
 Return true if there is a `saved_model` in the module path. 
 """
 def is_trained() -> bool:
-    return False 
+    return os.path.isfile(os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved.model"))
 
-def train_with_cv(trainfilename) -> float:
+"""
+Train with train_df and 
+compute the evaluation metrics with cv_df. 
+"""
+def train_with_cv(train_df, cv_df) -> float:
     return 0.0
 
 """
 Save the trained model in saved_model.{ext}
 """
-def train(trainfilename):
+def train(train_df):
     # Train the model. 
     # Save the model. 
-    saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved_model")
+    saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved.model")
     print(f"Debug: Saved model to {saved_model_path}.")
 
 
 """
 Generate submission.csv in folder of the model module. 
 """
-def predict(testfilename):
-    test_df = pd.read_csv(testfilename)
+def predict(test_df):
     submission_dir = os.path.dirname(os.path.realpath(__file__))
     test_df.to_csv(os.path.join(submission_dir, "submission.csv"))
     print("Debug: Saved predictions to", os.path.join(submission_dir, "submission.csv"))
