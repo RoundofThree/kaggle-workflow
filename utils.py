@@ -25,6 +25,7 @@ def feature_engineer(features_module, trainfilename, testfilename=None, cv=True,
         if 100%cv_percent == 0 and cv_times == 100//cv_percent:
             # kfold
             # split train_df into cv_times parts
+            train_df = train_df.sample(frac=1).reset_index(drop=True)
             batch_size = len(train_df) // cv_times
             for i in range(cv_times):
                 splitted_train_df = pd.concat([train_df.iloc[0:i*batch_size], train_df.iloc[(i+1)*batch_size:]])
@@ -55,15 +56,16 @@ Return true if there is engineered_{filename}.csv in the features_module folder.
 If cv=True, return cross validation error else return None. 
 If production=True, generate saved_model.{ext}.
 """
-def train(features_module, model_module, trainfilename, cv=True, production=False, cv_percent=20, cv_times=5):
+def train(features_module, model_module, trainfilename, cv=True, production=False, cv_percent=20, cv_times=5, verbose=False):
     cv_score = None 
     if cv:
         cv_score = 0 
         train_with_cv = get_function(model_module, "train_with_cv")
         generator = feature_engineer(features_module, trainfilename, cv=True, cv_percent=cv_percent, cv_times=cv_times)
-        for _ in range(cv_times):
+        for i in range(cv_times):
             train_df, cv_df, _ = next(generator)
             curr_cv_score = train_with_cv(train_df, cv_df)
+            if verbose: print(f"[Validation {i}]: {curr_cv_score}")
             cv_score += curr_cv_score
         cv_score /= cv_times
     # if production, save the trained model on the full train data 
@@ -78,7 +80,7 @@ def train(features_module, model_module, trainfilename, cv=True, production=Fals
 """
 Generate submission.csv in folder model_module. 
 """
-def predict(features_module, model_module, trainfilename, testfilename):
+def predict(features_module, model_module, trainfilename, testfilename, verbose=False):
     predict_test = get_function(model_module, "predict")
     generator = feature_engineer(features_module, trainfilename, testfilename=testfilename, cv=False)
     _, _, test_df = next(generator)

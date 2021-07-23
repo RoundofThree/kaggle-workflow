@@ -41,11 +41,10 @@ def train(config: ConfigParser, args):
             if ans.lower() not in ["y", "yes"]: 
                 continue # skip this model 
         print("Training...")
-        cv_score = utils.train(features_module, model_module, args.train, cv=cv, production=production, cv_percent=cv_percent, cv_times=cv_times)
+        cv_score = utils.train(features_module, model_module, args.train, cv=cv, production=production, cv_percent=cv_percent, cv_times=cv_times, verbose=args.verbose)
         if args.verbose and cv:
-            print(f"| {model_module} | {cv_score} |")
-            summary += f"\n| {model_module} | {cv_score} |"
-    print("\nSummary:")
+            summary += f"| {model_module} | {cv_score} |\n"
+    print("\nSummary:\n")
     print(summary)
 
 
@@ -68,7 +67,7 @@ def predict(config: ConfigParser, args):
 
         # generate submission.csv in model folder 
         print("Predicting...")
-        utils.predict(features_module, model_module, args.train, args.test)
+        utils.predict(features_module, model_module, args.train, args.test, verbose=args.verbose)
 
 
 if __name__ == '__main__':

@@ -65,4 +65,5 @@ Test: Save the ready-to-use predictions to submission.csv in the root folder.
 
 ## Improvements
 
-- Add ensemble and bagging of models 
+- [x] Add XGBoost as baseline
+- [ ] Add ensemble and bagging of models 
