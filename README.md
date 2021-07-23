@@ -14,15 +14,12 @@ Outputs clean_train.csv and clean_test.csv.
 ```
 
 Usually, I can split the training and predicting process, so I splitted the command into two modes: train and test. 
-Caveat: some feature engineering techniques such as grouping and target encoding make test feature engineering depend on 
-train feature engineering values. Therefore, train mode should save engineered_train.csv and engineered_test.csv in the
-corresponding folder. 
 
 Provide a train.csv to train. 
 
 ```
 Usage: 
-    python3 main.py --train train.csv --test test.csv
+    python3 main.py --train train.csv --test test.csv -v
 
 You already have trained model1, do you want to train again? (yes/no): y
 You already have trained model2, do you want to train again? (yes/no): y
@@ -31,6 +28,7 @@ Saved the trained models.
 (If verbose, should show the cross validation scores for each model) 
 Best of luck!
 ```
+
 Provide a test.csv file to predict. 
 
 ```
@@ -61,9 +59,14 @@ Test: Save the ready-to-use predictions to submission.csv in the root folder.
 - configparser
 - sklearn
 - XGBoost
-- LightGBM 
+- numpy
+- pandas
 
 ## Improvements
 
 - [x] Add XGBoost as baseline
 - [ ] Add ensemble and bagging of models 
+
+## References
+
+- `train.csv` and `test.csv` is from Kaggle Titanic Competition. 
