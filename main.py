@@ -23,10 +23,12 @@ If both flags are set, split into cv and train, feature engineer both separately
 then train the model from both of them joint and feature engineered as train set. 
 """
 def train(config: ConfigParser, args):
-    mode = config.get('main', "mode")  # "ensemble" or "bagging". TODO: for now it doesn't make any difference 
+    mode = config.get('main', "mode")  # "all" or "stacking" or "voting". TODO: for now it doesn't make any difference 
     n_models = config.getint("main", "n_models")
     summary = ""
-    
+    # mode = stacking 
+    # train_stacking(n_models, trainfile, cv, production, cv_percent, )
+    # mode = all 
     for i in range(n_models):
         section = f"model{i}"
         features_module = config.get(section, "features")
@@ -41,9 +43,9 @@ def train(config: ConfigParser, args):
             if ans.lower() not in ["y", "yes"]: 
                 continue # skip this model 
         print("Training...")
-        cv_score = utils.train(features_module, model_module, args.train, cv=cv, production=production, cv_percent=cv_percent, cv_times=cv_times, verbose=args.verbose)
+        cv_scores = utils.train(features_module, model_module, args.train, cv=cv, production=production, cv_percent=cv_percent, cv_times=cv_times, verbose=args.verbose)
         if args.verbose and cv:
-            summary += f"| {model_module} | {cv_score} |\n"
+            summary += f"| {model_module} | {cv_scores.mean()} ({cv_scores.std()}) |\n"
     print("\nSummary:\n")
     print(summary)
 
@@ -60,11 +62,6 @@ def predict(config: ConfigParser, args):
         model_module = config.get(section, "model")
         production = config.getboolean(section, "production")
         if not production: continue 
-        # check if there are engineered_test.csv 
-        # if not utils.is_engineered(features_module, args.test):
-        #     print("Please run main.py --train train.csv --test test.csv first.")
-        #     continue 
-
         # generate submission.csv in model folder 
         print("Predicting...")
         utils.predict(features_module, model_module, args.train, args.test, verbose=args.verbose)

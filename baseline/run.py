@@ -1,5 +1,5 @@
 import pandas as pd
-from xgboost import XGBClassifier
+import xgboost as xgb 
 from sklearn.metrics import accuracy_score
 import numpy as np
 import os
@@ -14,19 +14,16 @@ def is_trained() -> bool:
 # Train with train_df and 
 # compute the evaluation metrics with cv_df. 
 #
-def train_with_cv(train_df, cv_df) -> float:
+def train_with_cv(train_df: pd.DataFrame, cv_df: pd.DataFrame) -> float:
     train_X, train_y = train_df.drop('Survived', axis=1), train_df['Survived']
     cv_X, cv_y = cv_df.drop('Survived', axis=1), cv_df['Survived']
     ### XGBoost basic with early stopping 
-    params = {'n_estimators': 550, 'objective': 'binary:logistic', 'max_depth': 3, 'learning_rate': 0.01, 'verbosity': 0, 'n_jobs': 4}
-    bst = XGBClassifier(**params, use_label_encoder=False)
-    bst.fit(train_X, train_y, eval_metric='logloss', eval_set=[(cv_X, cv_y)], early_stopping_rounds=5, verbose=False)
-    # print the best n_estimators: 
-    # print(bst.best_ntree_limit)
-    predictions = bst.predict(cv_X) # the output is a numpy array 
-    assert predictions.shape == cv_y.shape
+    model = xgb.XGBClassifier(n_estimators=50, max_depth=6, learning_rate=0.01, use_label_encoder=False, eval_metric="error")
+    model.fit(train_X, train_y)
     ### metrics 
+    predictions = model.predict(cv_X)
     score = accuracy_score(cv_y, predictions)
+    ### TODO: if verbose, print the features importance
     return score
 
 #
@@ -35,27 +32,25 @@ def train_with_cv(train_df, cv_df) -> float:
 def train(train_df):
     train_X, train_y = train_df.drop('Survived', axis=1), train_df['Survived']
     # Train the model. 
-    params = {'n_estimators': 300, 'objective': 'binary:logistic', 'max_depth': 3, 'learning_rate': 0.01, 'verbosity': 0, 'n_jobs': 4}
-    bst = XGBClassifier(**params, use_label_encoder=False)
-    # bst._le = LabelEncoder().fit([1, 0])
-    bst.fit(train_X, train_y, verbose=False) # stop at when last cv validation stopped 
+    model = xgb.XGBClassifier(n_estimators=50, max_depth=6, learning_rate=0.01, use_label_encoder=False, eval_metric="error")
+    model.fit(train_X, train_y)
+    # print(f"Best ntree limit: {model.best_ntree_limit}")
     # Save the model
     saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved_model.json")
-    bst.save_model(saved_model_path)
+    model.save_model(saved_model_path)
     print(f"Debug: Saved model to {saved_model_path}.")
-
 
 #
 # Generate submission.csv in folder of the model module. 
 #
 def predict(test_df):
     # load model 
-    bst = XGBClassifier()
+    model = xgb.XGBClassifier()
     saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved_model.json")
-    bst.load_model(saved_model_path)
-    # print("Debug:", bst)
+    model.load_model(saved_model_path)
     # generate predictions
-    predictions = pd.DataFrame({'PassengerId': test_df['PassengerId'], 'Survived': bst.predict(test_df)})
+    predictions = model.predict(test_df)
+    submission = pd.DataFrame({'Survived': predictions}, index=test_df.index)
     submission_dir = os.path.dirname(os.path.realpath(__file__))
-    predictions.to_csv(os.path.join(submission_dir, "submission.csv"), index=False)
+    submission.to_csv(os.path.join(submission_dir, "submission.csv"))
     print("Debug: Saved predictions to", os.path.join(submission_dir, "submission.csv"))

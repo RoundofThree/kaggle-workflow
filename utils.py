@@ -1,5 +1,5 @@
-import os 
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from importlib import import_module
 
@@ -16,8 +16,8 @@ Generate pd.DataFrame of feature engineered train data and cv data (optional) an
 """
 def feature_engineer(features_module, trainfilename, testfilename=None, cv=True, cv_percent=20, cv_times=5) -> tuple:
     process_features = get_function(features_module, "process_features")
-    train_df = pd.read_csv(trainfilename)
-    test_df = pd.read_csv(testfilename) if testfilename else None 
+    train_df = pd.read_csv(trainfilename, index_col="PassengerId")
+    test_df = pd.read_csv(testfilename, index_col="PassengerId") if testfilename else None 
     if not cv:
         engineered_train_df, engineered_test_df = process_features(train_df, test_df)
         yield engineered_train_df, None, engineered_test_df 
@@ -25,7 +25,6 @@ def feature_engineer(features_module, trainfilename, testfilename=None, cv=True,
         if 100%cv_percent == 0 and cv_times == 100//cv_percent:
             # kfold
             # split train_df into cv_times parts
-            train_df = train_df.sample(frac=1).reset_index(drop=True)
             batch_size = len(train_df) // cv_times
             for i in range(cv_times):
                 splitted_train_df = pd.concat([train_df.iloc[0:i*batch_size], train_df.iloc[(i+1)*batch_size:]])
@@ -59,22 +58,23 @@ If production=True, generate saved_model.{ext}.
 def train(features_module, model_module, trainfilename, cv=True, production=False, cv_percent=20, cv_times=5, verbose=False):
     cv_score = None 
     if cv:
-        cv_score = 0 
+        cv_scores = []
         train_with_cv = get_function(model_module, "train_with_cv")
         generator = feature_engineer(features_module, trainfilename, cv=True, cv_percent=cv_percent, cv_times=cv_times)
         for i in range(cv_times):
             train_df, cv_df, _ = next(generator)
             curr_cv_score = train_with_cv(train_df, cv_df)
             if verbose: print(f"[Validation {i}]: {curr_cv_score}")
-            cv_score += curr_cv_score
-        cv_score /= cv_times
+            cv_scores.append(curr_cv_score)
+        print("[Debug]: ", cv_scores)
+        cv_scores = np.asarray(cv_scores)
     # if production, save the trained model on the full train data 
     if production:
         generator = feature_engineer(features_module, trainfilename, cv=False)
         full_train_df, _, _ = next(generator)
         train_model = get_function(model_module, "train")
         train_model(full_train_df)
-    return cv_score 
+    return cv_scores
 
     
 """

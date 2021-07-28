@@ -35,12 +35,12 @@ def clean(trainfilename, testfilename=None):
     train_df.drop(["Name", "Ticket", "Cabin", "Age", "Embarked"], axis=1, inplace=True)
     test_df.drop(["Name", "Ticket", "Cabin", "Age", "Embarked"], axis=1, inplace=True)
     # should I remove too high fares? Not for now but maybe 
-    # scaling 
-    features_to_scale = ['Fare']
-    scale_mean = train_df[features_to_scale].mean(axis=0)
-    scale_std = train_df[features_to_scale].std(axis=0)
-    train_df[features_to_scale] = (train_df[features_to_scale] - scale_mean) / scale_std 
-    test_df[features_to_scale] = (test_df[features_to_scale] - scale_mean) / scale_std
+    # scaling should be done in feature engineering module 
+    # features_to_scale = ['Fare']
+    # scale_mean = train_df[features_to_scale].mean(axis=0)
+    # scale_std = train_df[features_to_scale].std(axis=0)
+    # train_df[features_to_scale] = (train_df[features_to_scale] - scale_mean) / scale_std 
+    # test_df[features_to_scale] = (test_df[features_to_scale] - scale_mean) / scale_std
     # to csv
     train_df.to_csv(f"cleaned_{trainfilename}", index="PassengerId")
     if testfilename: test_df.to_csv(f"cleaned_{testfilename}", index="PassengerId")
