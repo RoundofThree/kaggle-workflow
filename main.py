@@ -56,7 +56,6 @@ def train_all(config: ConfigParser, args):
             ans = input(f"You already have trained {model_module}, do you want to train from scratch? (yes/no): ")
             if ans.lower() not in ["y", "yes"]: 
                 continue # skip this model 
-        print("Training...")
         cv_scores = utils.train(features_module, model_module, args.train, cv=cv, production=production, cv_percent=cv_percent, cv_times=cv_times, verbose=args.verbose)
         if args.verbose and cv:
             summary += f"| {model_module} | {cv_scores.mean()} ({cv_scores.std()}) |\n"
@@ -121,7 +120,6 @@ def predict_all(config: ConfigParser, args):
         production = config.getboolean(section, "production")
         if not production: continue 
         # generate submission.csv in model folder 
-        print("Predicting...")
         utils.predict(features_module, model_module, args.train, args.test, verbose=args.verbose)
 
 # 

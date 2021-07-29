@@ -94,8 +94,7 @@ def train_stacking(feature_model_modules, trainfilename, cv=True, production=Fal
         metalearner = LogisticRegression()
         metalearner.fit(layer_2_train_df, train_df['Survived'])
         predictions = metalearner.predict(layer_2_cv_df)
-        score = accuracy_score(cv_df['Survived'], predictions)
-        return score 
+        score = accuracy_score(cv_df['Survived'], predictions) 
     if production:
         train_df = pd.read_csv(trainfilename, index_col="PassengerId")
         layer_2_train_df = pd.DataFrame({})
@@ -120,6 +119,7 @@ def train_stacking(feature_model_modules, trainfilename, cv=True, production=Fal
         metalearner.fit(layer_2_train_df, train_df['Survived'])
         # save metalearner model 
         dump(metalearner, "stacking_metalearner.joblib")
+    return score 
     
     
 #
