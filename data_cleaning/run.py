@@ -1,9 +1,9 @@
 import pandas as pd 
 import numpy as np
 
-"""
-TODO: See analysis.ipynb
-"""
+# 
+# Clean data and save cleaned data to file prefixed with "cleaned_". 
+# 
 def clean(trainfilename, testfilename=None):
     train_df = pd.read_csv(trainfilename, index_col="PassengerId")
     test_df = pd.read_csv(testfilename, index_col="PassengerId") 

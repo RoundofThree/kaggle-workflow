@@ -1,7 +1,6 @@
 import pandas as pd
 import xgboost as xgb 
 from sklearn.metrics import accuracy_score
-import numpy as np
 import os
 
 #
@@ -29,28 +28,33 @@ def train_with_cv(train_df: pd.DataFrame, cv_df: pd.DataFrame) -> float:
 #
 # Save the trained model in saved_model.{ext}
 # 
-def train(train_df):
+def train(train_df: pd.DataFrame, save=True):
     train_X, train_y = train_df.drop('Survived', axis=1), train_df['Survived']
     # Train the model. 
     model = xgb.XGBClassifier(n_estimators=50, max_depth=6, learning_rate=0.01, use_label_encoder=False, eval_metric="error")
     model.fit(train_X, train_y)
     # print(f"Best ntree limit: {model.best_ntree_limit}")
     # Save the model
-    saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved_model.json")
-    model.save_model(saved_model_path)
-    print(f"Debug: Saved model to {saved_model_path}.")
+    if save:
+        saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved_model.json")
+        model.save_model(saved_model_path)
+        print(f"Debug: Saved model to {saved_model_path}.")
 
 #
 # Generate submission.csv in folder of the model module. 
+# If save=False, return array of predictions. 
 #
-def predict(test_df):
+def predict(test_df, save=True):
     # load model 
     model = xgb.XGBClassifier()
     saved_model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "saved_model.json")
     model.load_model(saved_model_path)
     # generate predictions
     predictions = model.predict(test_df)
-    submission = pd.DataFrame({'Survived': predictions}, index=test_df.index)
-    submission_dir = os.path.dirname(os.path.realpath(__file__))
-    submission.to_csv(os.path.join(submission_dir, "submission.csv"))
-    print("Debug: Saved predictions to", os.path.join(submission_dir, "submission.csv"))
+    if save:
+        submission = pd.DataFrame({'Survived': predictions}, index=test_df.index)
+        submission_dir = os.path.dirname(os.path.realpath(__file__))
+        submission.to_csv(os.path.join(submission_dir, "submission.csv"))
+        print("Debug: Saved predictions to", os.path.join(submission_dir, "submission.csv"))
+    else:
+        return predictions 

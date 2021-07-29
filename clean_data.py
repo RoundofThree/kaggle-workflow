@@ -14,6 +14,4 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-    # call clean(train) and clean(test) if not None
-    # save the cleaned data in cleaned_train.csv 
     data_cleaning.run.clean(args.train, args.test)
