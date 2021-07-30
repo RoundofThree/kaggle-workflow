@@ -65,7 +65,8 @@ Test: Save the ready-to-use predictions to submission.csv in the root folder.
 ## Improvements
 
 - [x] Add XGBoost as baseline
-- [ ] Add ensemble and bagging of models 
+- [x] Add ensemble mode: stacking 
+- [ ] Add ensemble mode: voting
 
 ## References
 
